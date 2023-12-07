@@ -1,0 +1,62 @@
+version: "3"
+
+services:
+  # MySQL Service
+  mysql:
+    image: mysql:latest
+    container_name: mysql-container
+    environment:
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_DATABASE: "TFG"
+      MYSQL_USER: "root"
+      MYSQL_PASSWORD: ""
+    ports:
+      - "3308:3308"
+
+  # MongoDB Service
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb-container
+    ports:
+      - "27018:27017"
+
+  # UserService
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: dockerfile
+    container_name: user-service-container
+    ports:
+      - "5001:3000"
+    depends_on:
+      - mysql
+
+  # RabbitMQ Service
+  rabbitmq:
+    image: "rabbitmq:latest"
+    container_name: rabbitmq-container
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  # GameService
+  game-service:
+    build:
+      context: ./game-service
+      dockerfile: dockerfile
+    container_name: game-service-container
+    ports:
+      - "5004:5000"
+    depends_on:
+      - mongodb
+
+  # EventService
+  event-service:
+    build:
+      context: ./event-service
+      dockerfile: dockerfile
+    container_name: event-service-container
+    ports:
+      - "5002:5002"
+    depends_on:
+      - user-service
